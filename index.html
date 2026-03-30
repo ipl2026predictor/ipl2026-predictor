@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>IPL 2026 Predictor</title>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+}
+
+h1 {
+  text-align:center;
+  padding:15px;
+}
+
+.container {
+  display:flex;
+  gap:20px;
+  padding:20px;
+}
+
+.matches {
+  width:60%;
+  height:90vh;
+  overflow-y:auto;
+}
+
+.card {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  margin:10px 0;
+  background:rgba(255,255,255,0.05);
+  border-radius:12px;
+}
+
+.team {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.logo {
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  color:white;
+}
+
+.selected {
+  background:#22c55e;
+  color:black;
+}
+
+.locked {
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.table-box {
+  width:40%;
+  background:rgba(255,255,255,0.05);
+  padding:10px;
+  border-radius:12px;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td {
+  padding:8px;
+  text-align:center;
+}
+
+tr:nth-child(even) {
+  background:rgba(255,255,255,0.05);
+}
+
+.top4 {
+  background:#facc15 !important;
+  color:black;
+  font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>IPL 2026 Predictor 🔥</h1>
+
+<div class="container">
+
+<div class="matches" id="matches"></div>
+
+<div class="table-box">
+<table id="table">
+<tr>
+<th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th>
+</tr>
+</table>
+</div>
+
+</div>
+
+<script>
+
+// TEAM COLORS + INITIALS (NO IMAGE ISSUES)
+let teams = {
+CSK:{p:0,w:0,l:0,pts:0,color:"#facc15"},
+MI:{p:0,w:0,l:0,pts:0,color:"#3b82f6"},
+RCB:{p:0,w:0,l:0,pts:0,color:"#ef4444"},
+KKR:{p:0,w:0,l:0,pts:0,color:"#a855f7"},
+SRH:{p:0,w:0,l:0,pts:0,color:"#f97316"},
+RR:{p:0,w:0,l:0,pts:0,color:"#ec4899"},
+GT:{p:0,w:0,l:0,pts:0,color:"#0ea5e9"},
+PBKS:{p:0,w:0,l:0,pts:0,color:"#dc2626"},
+LSG:{p:0,w:0,l:0,pts:0,color:"#06b6d4"},
+DC:{p:0,w:0,l:0,pts:0,color:"#2563eb"}
+};
+
+// FULL 70 MATCHES
+let matches = [
+["RCB","SRH"],["MI","KKR"],["RR","CSK"],["PBKS","GT"],["LSG","DC"],
+["KKR","SRH"],["CSK","PBKS"],["DC","MI"],["GT","RR"],["SRH","LSG"],
+["RCB","CSK"],["KKR","PBKS"],["RR","MI"],["DC","GT"],["KKR","LSG"],
+["RR","RCB"],["PBKS","SRH"],["CSK","DC"],["LSG","GT"],["MI","RCB"],
+["SRH","RR"],["CSK","KKR"],["RCB","LSG"],["MI","PBKS"],["GT","KKR"],
+["RCB","DC"],["SRH","CSK"],["KKR","RR"],["PBKS","LSG"],["GT","MI"],
+["SRH","DC"],["LSG","RR"],["MI","CSK"],["RCB","GT"],["DC","PBKS"],
+["RR","SRH"],["GT","CSK"],["LSG","KKR"],["DC","RCB"],["PBKS","RR"],
+["MI","SRH"],["GT","RCB"],["RR","DC"],["CSK","MI"],["SRH","KKR"],
+["GT","PBKS"],["MI","LSG"],["DC","CSK"],["SRH","PBKS"],["LSG","RCB"],
+["DC","KKR"],["RR","GT"],["CSK","LSG"],["RCB","MI"],["PBKS","DC"],
+["GT","SRH"],["RCB","KKR"],["PBKS","MI"],["LSG","CSK"],["KKR","GT"],
+["PBKS","RCB"],["DC","RR"],["CSK","SRH"],["RR","LSG"],["KKR","MI"],
+["CSK","GT"],["SRH","RCB"],["LSG","PBKS"],["MI","RR"],["KKR","DC"]
+];
+
+// COMPLETED MATCHES
+let realResults = {
+0:"RCB",
+1:"MI"
+};
+
+let matchDiv = document.getElementById("matches");
+
+// CREATE MATCHES
+matches.forEach((m,i)=>{
+let div = document.createElement("div");
+div.className="card";
+
+let t1 = createTeam(m[0]);
+let t2 = createTeam(m[1]);
+
+if(realResults[i]){
+let w = realResults[i];
+let l = m[0]==w?m[1]:m[0];
+
+update(w,l);
+
+if(w==m[0]) t1.classList.add("selected");
+else t2.classList.add("selected");
+
+t1.classList.add("locked");
+t2.classList.add("locked");
+
+}else{
+t1.onclick=()=>choose(m[0],m[1],t1);
+t2.onclick=()=>choose(m[1],m[0],t2);
+}
+
+div.appendChild(t1);
+div.appendChild(t2);
+matchDiv.appendChild(div);
+});
+
+// CREATE TEAM UI (WITH COLORED LOGO)
+function createTeam(name){
+let div = document.createElement("div");
+div.className="team";
+
+let logo = document.createElement("div");
+logo.className="logo";
+logo.style.background = teams[name].color;
+logo.innerText = name;
+
+div.appendChild(logo);
+div.appendChild(document.createTextNode(name));
+
+return div;
+}
+
+// UPDATE
+function update(w,l){
+teams[w].w++; teams[w].p++; teams[w].pts+=2;
+teams[l].l++; teams[l].p++;
+}
+
+// CLICK
+function choose(w,l,btn){
+btn.classList.add("selected");
+update(w,l);
+renderTable();
+}
+
+// TABLE
+function renderTable(){
+let table=document.getElementById("table");
+
+table.innerHTML=`<tr>
+<th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th>
+</tr>`;
+
+let sorted = Object.entries(teams).sort((a,b)=>b[1].pts-a[1].pts);
+
+sorted.forEach((t,i)=>{
+table.innerHTML+=`
+<tr class="${i<4?'top4':''}">
+<td>${t[0]}</td>
+<td>${t[1].p}</td>
+<td>${t[1].w}</td>
+<td>${t[1].l}</td>
+<td>${t[1].pts}</td>
+</tr>`;
+});
+}
+
+renderTable();
+
+</script>
+
+</body>
+</html>
